@@ -1439,7 +1439,7 @@ TGlslangToSpvTraverser::TGlslangToSpvTraverser(unsigned int spvVersion,
     // Add the source extensions
     const auto& sourceExtensions = glslangIntermediate->getRequestedExtensions();
     for (auto it = sourceExtensions.begin(); it != sourceExtensions.end(); ++it)
-        builder.addSourceExtension(it->c_str());
+        builder.addSourceExtension(it->first.c_str());
 
     // Add the top-level modes for this shader.
 
@@ -1448,7 +1448,7 @@ TGlslangToSpvTraverser::TGlslangToSpvTraverser(unsigned int spvVersion,
         builder.addExecutionMode(shaderEntry, spv::ExecutionModeXfb);
     }
 
-    if (sourceExtensions.find("GL_EXT_ray_flags_primitive_culling") != sourceExtensions.end()) {
+    if (glslangIntermediate->getLayoutPrimitiveCulling()) {
         builder.addCapability(spv::CapabilityRayTraversalPrimitiveCullingProvisionalKHR);
     }
 

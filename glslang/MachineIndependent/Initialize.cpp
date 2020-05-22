@@ -146,6 +146,7 @@ EProfile EDesktopProfile = static_cast<EProfile>(ENoProfile | ECoreProfile | ECo
 // Declare pointers to put into the table for versioning.
 #ifdef GLSLANG_WEB
     const Versioning* Es300Desktop130 = nullptr;
+    const Versioning* Es310Desktop420 = nullptr;
 #else
     const Versioning Es300Desktop130Version[] = { { EEsProfile,      0, 300, 0, nullptr },
                                                   { EDesktopProfile, 0, 130, 0, nullptr },
@@ -3058,6 +3059,24 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
             "bool textureFootprintGradNV(sampler2D, vec2, vec2, vec2, int, bool, out gl_TextureFootprint2DNV);"
             "bool textureFootprintGradClampNV(sampler2D, vec2, vec2, vec2, float, int, bool, out gl_TextureFootprint2DNV);"
             "\n");
+    }
+
+    if ((profile == EEsProfile && version >= 300 && version < 310) ||
+        (profile != EEsProfile && version >= 150 && version < 450)) { // GL_EXT_shader_integer_mix
+        commonBuiltins.append("int mix(int, int, bool);"
+                              "ivec2 mix(ivec2, ivec2, bvec2);"
+                              "ivec3 mix(ivec3, ivec3, bvec3);"
+                              "ivec4 mix(ivec4, ivec4, bvec4);"
+                              "uint  mix(uint,  uint,  bool );"
+                              "uvec2 mix(uvec2, uvec2, bvec2);"
+                              "uvec3 mix(uvec3, uvec3, bvec3);"
+                              "uvec4 mix(uvec4, uvec4, bvec4);"
+                              "bool  mix(bool,  bool,  bool );"
+                              "bvec2 mix(bvec2, bvec2, bvec2);"
+                              "bvec3 mix(bvec3, bvec3, bvec3);"
+                              "bvec4 mix(bvec4, bvec4, bvec4);"
+
+                              "\n");
     }
 
     // GL_AMD_gpu_shader_half_float/Explicit types
@@ -6737,6 +6756,18 @@ void TBuiltIns::initialize(const TBuiltInResource &resources, int version, EProf
             s.append(builtInConstant);
         }
 
+        if (version >= 100) {
+            // GL_EXT_blend_func_extended
+            snprintf(builtInConstant, maxSize, "const mediump int gl_MaxDualSourceDrawBuffersEXT = %d;", resources.maxDualSourceDrawBuffersEXT);
+            s.append(builtInConstant);
+            // this is here instead of with the others in initialize(version, profile) due to the dependence on gl_MaxDualSourceDrawBuffersEXT
+            if (language == EShLangFragment) {
+                s.append(
+                    "mediump vec4 gl_SecondaryFragColorEXT;"
+                    "mediump vec4 gl_SecondaryFragDataEXT[gl_MaxDualSourceDrawBuffersEXT];"
+                    "\n");
+            }
+        }
     } else {
         // non-ES profile
 
@@ -9101,6 +9132,16 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
             symbolTable.insert(*new TVariable(NewPoolTString("gl_FragData"), fragData));
             SpecialQualifier("gl_FragData", EvqFragColor, EbvFragData, symbolTable);
         }
+
+        // GL_EXT_blend_func_extended
+        if (profile == EEsProfile && version >= 100) {
+           symbolTable.setVariableExtensions("gl_MaxDualSourceDrawBuffersEXT",    1, &E_GL_EXT_blend_func_extended);
+           symbolTable.setVariableExtensions("gl_SecondaryFragColorEXT",    1, &E_GL_EXT_blend_func_extended);
+           symbolTable.setVariableExtensions("gl_SecondaryFragDataEXT",    1, &E_GL_EXT_blend_func_extended);
+           SpecialQualifier("gl_SecondaryFragColorEXT", EvqVaryingOut, EbvSecondaryFragColorEXT, symbolTable);
+           SpecialQualifier("gl_SecondaryFragDataEXT", EvqVaryingOut, EbvSecondaryFragDataEXT, symbolTable);
+        }
+
         break;
 
     case EShLangTessControl:
