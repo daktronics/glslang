@@ -1006,7 +1006,17 @@ spv::BuiltIn TGlslangToSpvTraverser::TranslateBuiltInDecoration(glslang::TBuiltI
     case glslang::EbvInstanceCustomIndex:
         return spv::BuiltInInstanceCustomIndexKHR;
     case glslang::EbvHitT:
-        return spv::BuiltInHitTKHR;
+        {
+            // this is a GLSL alias of RayTmax
+            // in SPV_NV_ray_tracing it has a dedicated builtin
+            // but in SPV_KHR_ray_tracing it gets mapped to RayTmax
+            auto& extensions = glslangIntermediate->getRequestedExtensions();
+            if (extensions.find("GL_NV_ray_tracing") != extensions.end()) {
+                return spv::BuiltInHitTNV;
+            } else {
+                return spv::BuiltInRayTmaxKHR;
+            }
+        }
     case glslang::EbvHitKind:
         return spv::BuiltInHitKindKHR;
     case glslang::EbvObjectToWorld:
@@ -3778,10 +3788,36 @@ spv::Id TGlslangToSpvTraverser::convertGlslangToSpvType(const glslang::TType& ty
         spvType = builder.makeUintType(32);
         break;
     case glslang::EbtAccStruct:
+        switch (glslangIntermediate->getStage()) {
+        case EShLangRayGen:
+        case EShLangIntersect:
+        case EShLangAnyHit:
+        case EShLangClosestHit:
+        case EShLangMiss:
+        case EShLangCallable:
+            // these all should have the RayTracingNV/KHR capability already
+            break;
+        default:
+            {
+                auto& extensions = glslangIntermediate->getRequestedExtensions();
+                if (extensions.find("GL_EXT_ray_query") != extensions.end()) {
+                    builder.addExtension(spv::E_SPV_KHR_ray_query);
+                    builder.addCapability(spv::CapabilityRayQueryKHR);
+                }
+            }
+            break;
+        }
         spvType = builder.makeAccelerationStructureType();
         break;
     case glslang::EbtRayQuery:
-        spvType = builder.makeRayQueryType();
+        {
+            auto& extensions = glslangIntermediate->getRequestedExtensions();
+            if (extensions.find("GL_EXT_ray_query") != extensions.end()) {
+                builder.addExtension(spv::E_SPV_KHR_ray_query);
+                builder.addCapability(spv::CapabilityRayQueryKHR);
+            }
+            spvType = builder.makeRayQueryType();
+        }
         break;
     case glslang::EbtReference:
         {
@@ -7955,7 +7991,7 @@ spv::Id TGlslangToSpvTraverser::createMiscOperation(glslang::TOperator op, spv::
         opCode = spv::OpRayQueryGetIntersectionInstanceIdKHR;
         break;
     case glslang::EOpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffset:
-        typeId = builder.makeIntType(32);
+        typeId = builder.makeUintType(32);
         opCode = spv::OpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetKHR;
         break;
     case glslang::EOpRayQueryGetIntersectionGeometryIndex:

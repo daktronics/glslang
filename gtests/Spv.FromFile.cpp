@@ -241,6 +241,7 @@ INSTANTIATE_TEST_SUITE_P(
         "rayQuery-allOps.frag",
         "rayQuery-initialization.Error.comp",
         "rayQuery-global.rgen",
+        "rayQuery-types.comp",
         "spv.set.vert",
         "spv.double.comp",
         "spv.100ops.frag",
@@ -577,6 +578,8 @@ INSTANTIATE_TEST_SUITE_P(
         "spv.ext.RayGenSBTlayout430.rgen",
         "spv.ext.RayGenSBTlayoutscalar.rgen",
         "spv.ext.World3x4.rahit",
+        "spv.ext.AccelDecl.frag",
+        "spv.ext.RayQueryDecl.frag",
     })),
     FileNameAsCustomTestSuffix
 );
