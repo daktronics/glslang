@@ -107,7 +107,7 @@ option(ENABLE_PCH "Enables Precompiled header" ON)
 option(ENABLE_CTEST "Enables testing" ON)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND WIN32)
-    set(CMAKE_INSTALL_PREFIX "install" CACHE STRING "..." FORCE)
+    #set(CMAKE_INSTALL_PREFIX "install" CACHE STRING "..." FORCE)
 endif()
 
 option(USE_CCACHE "Use ccache" OFF)
