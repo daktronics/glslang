@@ -199,7 +199,7 @@ endif(WIN32)
 ################################################################################
 if(ENABLE_GLSLANG_INSTALL)
     if(BUILD_SHARED_LIBS)
-        install(TARGETS glslang MachineIndependent
+        install(TARGETS glslang MachineIndependent GenericCodeGen
                 EXPORT  glslangTargets
                 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
