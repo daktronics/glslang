@@ -37,7 +37,7 @@
 # The HLSL target is now just a stub that exists for backwards compatibility for
 # projects that referenced this target.
 
-add_library(HLSL ${LIB_TYPE} "stub.cpp")
+add_library(HLSL STATIC "stub.cpp")
 set_property(TARGET HLSL PROPERTY FOLDER hlsl)
 set_property(TARGET HLSL PROPERTY POSITION_INDEPENDENT_CODE ON)
 
