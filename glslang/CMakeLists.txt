@@ -204,7 +204,7 @@ endif()
 if(ENABLE_GLSLANG_INSTALL)
     if(BUILD_SHARED_LIBS)
         install(TARGETS glslang MachineIndependent GenericCodeGen
-                EXPORT  glslangTargets
+                EXPORT  glslang-targets
                 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
