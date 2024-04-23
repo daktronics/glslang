@@ -383,7 +383,9 @@ protected:
                     }
                     if (curToken == '#') {
                         if (seenNumSign) {
-                            parseContext.ppError(lastLineTokenLocs[curPos], "(#) can be preceded in its line only by spaces or horizontal tabs", "#", "");
+                            //Workaround for https://github.com/KhronosGroup/glslang/issues/3582
+                            //parseContext.ppError(lastLineTokenLocs[curPos], "(#) can be preceded in its line only by spaces or horizontal tabs", "#", "");
+                            (void)curPos;
                         } else {
                             seenNumSign = true;
                         }
